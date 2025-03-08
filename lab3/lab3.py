@@ -8,6 +8,7 @@ from datetime import datetime
 import urllib.request
 import hashlib
 import numpy as np
+from matplotlib.patches import Patch
 
 st.set_page_config(
     page_title="Ukraine VHI data analysis",
@@ -174,7 +175,7 @@ def init_session_state():
         st.session_state.week_range = (1, 52)
     
     if 'year_range' not in st.session_state:
-        st.session_state.year_range = (1981, 2023)
+        st.session_state.year_range = (1981, 2024)
     
     if 'ascending_sort' not in st.session_state:
         st.session_state.ascending_sort = False
@@ -187,16 +188,16 @@ def reset_filters():
     st.session_state.selected_region = 'Київська'
     st.session_state.week_range = (1, 52)
     
+    st.session_state.ascending_sort = False
+    st.session_state.descending_sort = False
+    
     df = read_vhi_files()
     if not df.empty:
         min_year = df['Year'].min()
         max_year = df['Year'].max()
         st.session_state.year_range = (min_year, max_year)
     else:
-        st.session_state.year_range = (1981, 2023)
-    
-    st.session_state.ascending_sort = False
-    st.session_state.descending_sort = False
+        st.session_state.year_range = (1981, 2024)
 
 def main():
     st.title("analysis of vegetation data in Ukraine")
@@ -260,27 +261,37 @@ def main():
         
         col1_sort, col2_sort = st.columns(2)
         
-        with col1_sort:
-            ascending = st.checkbox(
-                "sort by ascending order",
-                value=st.session_state.ascending_sort
-            )
-            if ascending and not st.session_state.ascending_sort:
+        def toggle_ascending():
+            if st.session_state.ascending_sort_checkbox:
                 st.session_state.ascending_sort = True
                 st.session_state.descending_sort = False
-            elif not ascending:
+                st.session_state.descending_sort_checkbox = False
+            else:
                 st.session_state.ascending_sort = False
-        
-        with col2_sort:
-            descending = st.checkbox(
-                "sort in descending order",
-                value=st.session_state.descending_sort
-            )
-            if descending and not st.session_state.descending_sort:
+
+        def toggle_descending():
+            if st.session_state.descending_sort_checkbox:
                 st.session_state.descending_sort = True
                 st.session_state.ascending_sort = False
-            elif not descending:
+                st.session_state.ascending_sort_checkbox = False
+            else:
                 st.session_state.descending_sort = False
+
+        with col1_sort:
+            st.checkbox(
+                "sort by ascending order",
+                value=st.session_state.ascending_sort,
+                key="ascending_sort_checkbox",
+                on_change=toggle_ascending
+            )
+
+        with col2_sort:
+            st.checkbox(
+                "sort in descending order",
+                value=st.session_state.descending_sort,
+                key="descending_sort_checkbox",
+                on_change=toggle_descending
+            )
         
         if st.button("reset filters"):
             reset_filters()
@@ -377,7 +388,6 @@ def main():
                     ax.set_title(f'comparison  by average values {selected_index} betwen regions')
                     ax.set_xticklabels(region_means['Region_Name'], rotation=45, ha='right')
                     
-                    from matplotlib.patches import Patch
                     legend_elements = [
                         Patch(facecolor='#1f77b4', label='other regions'),
                         Patch(facecolor='#ff7f0e', label=f'selected region: {st.session_state.selected_region}')
