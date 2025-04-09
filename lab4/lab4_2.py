@@ -8,7 +8,6 @@ import seaborn as sns
 import csv
 
 def load_data():
-    # Зчитування даних у Pandas DataFrame
     df = pd.read_csv('/home/biba/analizlabs/lab4/imports-85.data', 
                      sep=',', 
                      decimal='.', 
@@ -36,19 +35,16 @@ def load_data():
     print("Data loaded into Pandas DataFrame:")
     print(df.head())  # Показуємо перші рядки DataFrame
 
-    # Пряме зчитування даних у NumPy масив
     data_np = []
     with open('/home/biba/analizlabs/lab4/imports-85.data', 'r') as file:
         csv_reader = csv.reader(file)
         for row in csv_reader:
             data_np.append(row)
     
-    # Конвертація у NumPy масив
     data_np = np.array(data_np)
     print("\nData loaded into NumPy array:")
     print(data_np[:5]) 
     
-    # Створення словника для відображення імен стовпців на індекси
     col_indices = {name: i for i, name in enumerate(column_names)}
     
     return df, data_np, col_indices, numeric_columns
@@ -61,28 +57,22 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     print("Missing values before handling:")
     print(df.isnull().sum())
     
-    # Обробка відсутніх значень у DataFrame - ВИПРАВЛЕНО ДЛЯ УНИКНЕННЯ FutureWarning
     numeric_columns_df = df.select_dtypes(include=['float64', 'int64']).columns
     for col in numeric_columns_df:
-        # Виправлений спосіб заповнення NaN значень
         df[col] = df[col].fillna(df[col].median())
     
     categorical_columns = df.select_dtypes(include=['object']).columns
     for col in categorical_columns:
-        # Виправлений спосіб заповнення NaN значень
         df[col] = df[col].fillna(df[col].mode()[0])
     
     print("\nMissing values after handling in Pandas DataFrame:")
     print(df.isnull().sum())
     
-    # Обробка відсутніх значень у NumPy масиві
     print("\nHandling missing values using NumPy arrays:")
     
-    # Витягуємо значення horsepower з NumPy масиву
     horsepower_idx = col_indices['horsepower']
     horsepower_np = np.array([row[horsepower_idx] for row in data_np])
     
-    # Конвертація у числові значення, де '?' замінюється на np.nan
     horsepower_np = np.array([float(x) if x != '?' else np.nan for x in horsepower_np])
     
     horsepower_np_clean = horsepower_np[~np.isnan(horsepower_np)]
@@ -99,11 +89,9 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     def standardize(arr):
         return (arr - np.mean(arr)) / np.std(arr)
 
-    # NumPy реалізація для price
     price_idx = col_indices['price']
     price_np = np.array([float(row[price_idx]) if row[price_idx] != '?' else np.nan for row in data_np])
-    price_np = price_np[~np.isnan(price_np)]  # Видаляємо NaN для справедливого порівняння з Pandas
-    
+    price_np = price_np[~np.isnan(price_np)] 
     price_normalized_np = normalize(price_np)
     price_standardized_np = standardize(price_np)
     
@@ -112,7 +100,6 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     print(f"Normalized - Min: {np.min(price_normalized_np)}, Max: {np.max(price_normalized_np)}, Mean: {np.mean(price_normalized_np):.2f}, Std: {np.std(price_normalized_np):.2f}")
     print(f"Standardized - Min: {np.min(price_standardized_np):.2f}, Max: {np.max(price_standardized_np):.2f}, Mean: {np.mean(price_standardized_np):.2f}, Std: {np.std(price_standardized_np):.2f}")
     
-    # Pandas реалізація - тепер використовуємо тільки рядки без NaN для чесного порівняння
     df_price_clean = df.dropna(subset=['price'])
     df_numeric = df_price_clean[numeric_columns].copy()
     df_normalized = df_numeric.apply(normalize)
@@ -143,10 +130,8 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     plt.close()
     print("Histogram generated and saved as 'price_histogram.png'")
     
-    # 4. Scatter plot
     print("\nTask 4: Scatter plot of two numeric attributes\n")
     
-    # Отримуємо очищені дані з NumPy масиву для horsepower і city-mpg
     horsepower_idx = col_indices['horsepower']
     mpg_idx = col_indices['city-mpg']
     
@@ -159,7 +144,6 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     horsepower_np = combined_data[:, 0]
     mpg_np = combined_data[:, 1]
     
-    # Використання NumPy для візуалізації
     plt.figure(figsize=(10, 6))
     plt.subplot(2, 1, 1)
     plt.scatter(horsepower_np, mpg_np, alpha=0.6)
@@ -167,7 +151,6 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     plt.xlabel('Horsepower')
     plt.ylabel('City MPG')
     
-    # Використання Pandas - лише рядки де обидва стовпці мають значення
     df_scatter = df.dropna(subset=['horsepower', 'city-mpg'])
     plt.subplot(2, 1, 2)
     df_scatter.plot.scatter(x='horsepower', y='city-mpg', alpha=0.6, color='green', ax=plt.gca())
@@ -177,10 +160,8 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     plt.close()
     print("Scatter plot generated and saved as 'horsepower_vs_mpg.png'")
     
-    # 5. Pearson and Spearman correlation
     print("\nTask 5: Pearson and Spearman correlation\n")
     
-    # Використання NumPy/SciPy з очищеними даними
     pearson_coef, p_value = pearsonr(horsepower_np, mpg_np)
     spearman_coef, s_p_value = spearmanr(horsepower_np, mpg_np)
     
@@ -188,7 +169,6 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     print(f"Pearson correlation coefficient: {pearson_coef:.3f} (p-value: {p_value:.4f})")
     print(f"Spearman correlation coefficient: {spearman_coef:.3f} (p-value: {s_p_value:.4f})")
     
-    # Використання Pandas з тим самим набором даних для справедливого порівняння
     correlation_df = df_scatter[['horsepower', 'city-mpg']].corr(method='pearson')
     spearman_df = df_scatter[['horsepower', 'city-mpg']].corr(method='spearman')
     
@@ -198,15 +178,12 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     print("\nSpearman correlation matrix:")
     print(spearman_df)
     
-    # 6. One-Hot Encoding
     print("\nTask 6: One-Hot Encoding\n")
     
-    # Отримання унікальних значень 'make' з NumPy масиву
     make_idx = col_indices['make']
     make_values = [row[make_idx] for row in data_np]
     unique_makes = np.unique(make_values)
     
-    # Створення one-hot encoding вручну з NumPy
     make_oh_np = np.zeros((len(make_values), len(unique_makes)))
     for i, make in enumerate(make_values):
         make_idx_in_unique = np.where(unique_makes == make)[0][0]
@@ -215,22 +192,18 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     print(f"NumPy manual One-Hot Encoding shape: {make_oh_np.shape}")
     print(f"Categories: {unique_makes}")
     
-    # Використання sklearn для порівняння
     make_array = np.array(make_values).reshape(-1, 1)
     encoder = OneHotEncoder(sparse_output=False)
     make_encoded_np = encoder.fit_transform(make_array)
     print(f"\nNumPy/sklearn One-Hot Encoding shape: {make_encoded_np.shape}")
     print(f"Categories: {encoder.categories_[0]}")
     
-    # Використання Pandas
     make_encoded_pd = pd.get_dummies(df['make'], prefix='make')
     print(f"\nPandas One-Hot Encoding shape: {make_encoded_pd.shape}")
     print("First 5 columns:", list(make_encoded_pd.columns[:5]))
     
-    # 7. Visualization of multidimensional data
     print("\nTask 7: Visualization of multidimensional data\n")
     
-    # 1. Pair Plot - використовуємо очищені дані
     plt.figure(figsize=(15, 10))
     pair_plot_features = ['horsepower', 'city-mpg', 'price', 'curb-weight']
     df_pair_plot = df.dropna(subset=pair_plot_features)
@@ -239,7 +212,6 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     plt.close()
     print("Pair plot generated and saved as 'pair_plot.png'")
     
-    # 2. Correlation Heatmap - використовуємо очищені дані
     plt.figure(figsize=(12, 10))
     correlation_matrix = df_pair_plot[numeric_columns].corr()
     sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', linewidths=0.5, fmt='.2f')
@@ -249,24 +221,18 @@ def second_level_tasks(df, data_np, col_indices, numeric_columns):
     plt.close()
     print("Correlation heatmap generated and saved as 'correlation_heatmap.png'")
     
-    # 3. Parallel Coordinates Plot - використовуємо очищені дані
     plt.figure(figsize=(15, 10))
-    # Нормалізуємо дані для кращої візуалізації
     features_for_parallel = ['horsepower', 'city-mpg', 'engine-size', 'price', 'curb-weight']
     df_parallel = df.dropna(subset=features_for_parallel)
     
-    # Нормалізуємо числові стовпці
     df_normalized = df_parallel[features_for_parallel].copy()
     for col in features_for_parallel:
         df_normalized[col] = (df_normalized[col] - df_normalized[col].min()) / (df_normalized[col].max() - df_normalized[col].min())
     
-    # Додаємо категоріальну змінну для кольору
     df_normalized['make'] = df_parallel['make']
-    # Вибираємо підмножину марок для чистішої візуалізації
     top_makes = df_parallel['make'].value_counts().nlargest(5).index.tolist()
     df_normalized = df_normalized[df_normalized['make'].isin(top_makes)]
     
-    # Створюємо паралельний координатний графік
     from pandas.plotting import parallel_coordinates
     parallel_coordinates(df_normalized, 'make', colormap='tab10')
     plt.title('Parallel Coordinates Plot')
