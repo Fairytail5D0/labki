@@ -37,13 +37,13 @@ class HarmonicVisualizer:
         
         self.ax = self.fig.add_subplot(gs[0])
         
-        self.ax.set_xlabel('Час (с)')
-        self.ax.set_ylabel('Амплітуда')
-        self.ax.set_title('Візуалізація гармоніки з шумом та фільтрацією')
+        self.ax.set_xlabel('Time (s)')
+        self.ax.set_ylabel('Amplitude')
+        self.ax.set_title('Harmonic Visualization with Noise and Filtering')
         
-        self.clean_line, = self.ax.plot(self.t, self.clean_signal, 'g-', label='Чиста гармоніка')
-        self.noisy_line, = self.ax.plot(self.t, self.noisy_signal, 'r-', alpha=0.5, label='Зашумлена гармоніка')
-        self.filtered_line, = self.ax.plot(self.t, self.filtered_signal, 'b-', label='Відфільтрована гармоніка')
+        self.clean_line, = self.ax.plot(self.t, self.clean_signal, 'g-', label='Clean Harmonic')
+        self.noisy_line, = self.ax.plot(self.t, self.noisy_signal, 'r-', alpha=0.5, label='Noisy Harmonic')
+        self.filtered_line, = self.ax.plot(self.t, self.filtered_signal, 'b-', label='Filtered Harmonic')
         
         self.ax.legend()
         
@@ -58,19 +58,19 @@ class HarmonicVisualizer:
         ax_filter_order = plt.axes([0.15, 0.1, 0.3, 0.03])
         ax_cutoff_freq = plt.axes([0.5, 0.1, 0.3, 0.03])
         
-        self.slider_amp = Slider(ax_amplitude, 'Амплітуда', 0.1, 5.0, valinit=self.amplitude)
-        self.slider_freq = Slider(ax_frequency, 'Частота', 0.1, 5.0, valinit=self.frequency)
-        self.slider_phase = Slider(ax_phase, 'Фаза', 0.0, 2*np.pi, valinit=self.phase)
-        self.slider_noise_mean = Slider(ax_noise_mean, 'Середнє шуму', -1.0, 1.0, valinit=self.noise_mean)
-        self.slider_noise_cov = Slider(ax_noise_cov, 'Дисперсія шуму', 0.01, 1.0, valinit=self.noise_covariance)
-        self.slider_filter_order = Slider(ax_filter_order, 'Порядок фільтра', 1, 10, valinit=self.filter_order, valstep=1)
-        self.slider_cutoff_freq = Slider(ax_cutoff_freq, 'Частота зрізу', 0.1, 10.0, valinit=self.cutoff_freq)
+        self.slider_amp = Slider(ax_amplitude, 'Amplitude', 0.1, 5.0, valinit=self.amplitude)
+        self.slider_freq = Slider(ax_frequency, 'Frequency', 0.1, 5.0, valinit=self.frequency)
+        self.slider_phase = Slider(ax_phase, 'Phase', 0.0, 2*np.pi, valinit=self.phase)
+        self.slider_noise_mean = Slider(ax_noise_mean, 'Noise Mean', -1.0, 1.0, valinit=self.noise_mean)
+        self.slider_noise_cov = Slider(ax_noise_cov, 'Noise Variance', 0.01, 1.0, valinit=self.noise_covariance)
+        self.slider_filter_order = Slider(ax_filter_order, 'Filter Order', 1, 10, valinit=self.filter_order, valstep=1)
+        self.slider_cutoff_freq = Slider(ax_cutoff_freq, 'Cutoff Frequency', 0.1, 10.0, valinit=self.cutoff_freq)
         
         ax_reset = plt.axes([0.8, 0.025, 0.1, 0.04])
         self.button_reset = Button(ax_reset, 'Reset')
         
         ax_check = plt.axes([0.05, 0.025, 0.15, 0.1])
-        self.check_buttons = CheckButtons(ax_check, ['Показати шум', 'Показати фільтр'], [self.show_noise, self.show_filtered])
+        self.check_buttons = CheckButtons(ax_check, ['Show Noise', 'Show Filtered'], [self.show_noise, self.show_filtered])
         
         self.slider_amp.on_changed(self.update_harmonic)
         self.slider_freq.on_changed(self.update_harmonic)
@@ -82,7 +82,7 @@ class HarmonicVisualizer:
         self.button_reset.on_clicked(self.reset)
         self.check_buttons.on_clicked(self.update_visibility)
         
-        plt.figtext(0.5, 0.01, "Інструкція: Використовуйте слайдери для зміни параметрів, чекбокси для відображення/приховування шуму та фільтрації.", 
+        plt.figtext(0.5, 0.01, "Instructions: Use sliders to adjust parameters, checkboxes to toggle noise and filter display.", 
                    ha="center", bbox={"facecolor":"lightgray", "alpha":0.5, "pad":5})
         
         plt.tight_layout()
@@ -94,7 +94,7 @@ class HarmonicVisualizer:
         self.phase = self.slider_phase.val
         
         self.clean_signal = self.generate_harmonic()
-        self.noisy_signal = self.clean_signal + self.noise  # Використовуємо існуючий шум
+        self.noisy_signal = self.clean_signal + self.noise  # Use existing noise
         self.filtered_signal = self.filter_signal()
         
         self.update_plot()
@@ -104,7 +104,6 @@ class HarmonicVisualizer:
         self.noise_covariance = self.slider_noise_cov.val
         
         self.noise = np.random.normal(self.noise_mean, self.noise_covariance, len(self.t))
-        
         self.noisy_signal = self.clean_signal + self.noise
         self.filtered_signal = self.filter_signal()
         
@@ -119,9 +118,9 @@ class HarmonicVisualizer:
         self.update_plot()
     
     def update_visibility(self, label):
-        if label == 'Показати шум':
+        if label == 'Show Noise':
             self.show_noise = not self.show_noise
-        elif label == 'Показати фільтр':
+        elif label == 'Show Filtered':
             self.show_filtered = not self.show_filtered
         
         self.update_plot()
